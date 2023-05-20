@@ -224,22 +224,15 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        // Добавление разделительной линии после сообщения
-        val divider = View(this)
-        divider.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            1 // Толщина линии
-        )
-        divider.setBackgroundColor(Color.parseColor("#CCCCCC")) // Цвет линии
-
-        messageContainer.addView(divider)
-
         // Добавление TextView в контейнер сообщений и регистрация для контекстного меню
         messageContainer.addView(messageTextView)
         registerForContextMenu(messageTextView)
 
         // После добавления сообщения прокрутите чат вниз
         scrollToBottom()
+
+        // Добавление разделительной линии после сообщения
+        addDividingLine()
     }
 
     // Функция отображения сообщения chatGPT
@@ -269,7 +262,19 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
+        // Добавление TextView в контейнер сообщений и регистрация для контекстного меню
+        messageContainer.addView(messageTextView)
+        registerForContextMenu(messageTextView)
+
+        // После добавления сообщения прокрутите чат вниз
+        scrollToBottom()
+
         // Добавление разделительной линии после сообщения
+        addDividingLine()
+    }
+
+    // Функция добавляет разделительную линию после сообщения
+    private fun addDividingLine() {
         val divider = View(this)
         divider.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -278,13 +283,6 @@ class MainActivity : AppCompatActivity() {
         divider.setBackgroundColor(Color.parseColor("#CCCCCC")) // Цвет линии
 
         messageContainer.addView(divider)
-
-        // Добавление TextView в контейнер сообщений и регистрация для контекстного меню
-        messageContainer.addView(messageTextView)
-        registerForContextMenu(messageTextView)
-
-        // После добавления сообщения прокрутите чат вниз
-        scrollToBottom()
     }
 
     // Функция показывает контекстное меню сообщения
