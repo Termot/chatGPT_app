@@ -15,6 +15,16 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <!-- Добавляем Toolbar -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#343541"
+            android:elevation="4dp"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:title="ChatGPT" />
+
         <ScrollView
             android:id="@+id/messageScrollView"
             android:layout_width="match_parent"

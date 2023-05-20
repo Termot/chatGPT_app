@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- ... другие атрибуты ... -->
+
+        <!-- Цвет текста в Toolbar -->
+        <item name="android:textColorPrimary">#888888</item>
+
+        <!-- Цвет кнопки в Toolbar -->
+        <item name="android:colorControlNormal">#FFFFFF</item>
+    </style>
     <style name="MenuButton" parent="Widget.AppCompat.Button">
         <item name="android:layout_marginStart">8dp</item> <!-- Отступ слева -->
         <item name="android:layout_marginTop">8dp</item> <!-- Отступ сверху -->

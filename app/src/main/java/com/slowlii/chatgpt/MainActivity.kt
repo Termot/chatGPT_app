@@ -21,7 +21,8 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.ScrollView
 import android.widget.TextView
-import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.GravityCompat
@@ -71,11 +72,29 @@ class MainActivity : AppCompatActivity() {
         val headerView = layoutInflater.inflate(R.layout.drawer_menu, navigationView, false)
         navigationView.addHeaderView(headerView)
 
+        // Прослушиваем кнопку настроек ключа API
         val settingsButton: Button = headerView.findViewById(R.id.settingsButton)
         settingsButton.setOnClickListener {
             val intent = Intent(this, ChatGPTkeyActivity::class.java)
             startActivity(intent)
+            drawerLayout.closeDrawer(GravityCompat.START)
         }
+
+        // Toolbar, а иначе верхний элемент окна с кнопками активности, например, кнопки вызова меню
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        val toggle = ActionBarDrawerToggle(
+            this,
+            drawerLayout,
+            toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        )
+
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+
 
         // Настройки свайпа бокового окна
         val gestureDetector = GestureDetectorCompat(this, object : GestureDetector.SimpleOnGestureListener() {

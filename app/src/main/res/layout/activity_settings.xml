@@ -3,20 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#393A47">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="ChatGPT API"
         android:textSize="24sp"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp"
+        android:textColor="#9B9B9B"/>
 
     <EditText
         android:id="@+id/editText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Введите ChatGPT API ключ"/>
+        android:hint="Введите ChatGPT API ключ"
+        android:textColor="#FFFFFF"/>
 
     <Button
         android:id="@+id/saveButton"
