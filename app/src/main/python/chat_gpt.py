@@ -5,13 +5,6 @@ import json
 def askGPT(prompt_json, message, key):
     openai.api_key = key
 
-    # Здесь импорт моего личного API ключа
-    try:
-        import api_keys
-        openai.api_key = api_keys.get_key()
-    except Exception as e:
-        return f'Ошибка: {e}'
-
     try:
         prompt = json.loads(prompt_json)
         if message:
