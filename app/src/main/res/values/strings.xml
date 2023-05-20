@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ChatGPT</string>
+    <string name="menu_button_description">Открыть меню</string>
+</resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerMenu"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#393A47">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Меню"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:padding="16dp"/>
+
+    <Button
+        android:id="@+id/settingsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ChatGPT API key"
+        app:backgroundTint="@null"
+        android:background="@drawable/button_background"
+        style="@style/MenuButton"/>
+
+    <Button
+        android:id="@+id/secondButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Настройки ChatGPT"
+        app:backgroundTint="@null"
+        android:background="@drawable/button_background"
+        style="@style/MenuButton"/>
+
+    <!-- Добавьте здесь другие элементы меню, если необходимо -->
+
+</LinearLayout>
