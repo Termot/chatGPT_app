@@ -14,9 +14,15 @@ android {
         minSdk 24
         targetSdk 33
         versionCode 1
-        versionName "1.0"
+        versionName "1.6"
+
+        resConfigs "en", "ru"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // Меняет имя итогового APK файла
+        archivesBaseName = "ChatGPT-v" + defaultConfig.versionName
+        project.ext.set("archivesBaseName", "ChatGPT-" + defaultConfig.versionName)
 
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
@@ -40,12 +46,20 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+            resValue "string", "app_name", "ChatGPT (debug)"
+        }
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true // сжимаем итоговый APK (вроде не работает)
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
+            resValue "string", "app_name", "ChatGPT"
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8

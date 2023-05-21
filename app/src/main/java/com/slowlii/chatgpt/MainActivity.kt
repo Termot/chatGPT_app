@@ -14,8 +14,10 @@ import android.view.Gravity
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.PopupMenu
@@ -41,8 +43,11 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var messageContainer: LinearLayout // Контейнер для сообщений
     private lateinit var messageEditText: EditText // Поле ввода сообщения
-    private lateinit var sendButton: Button // Кнопка отправки сообщения
+    private lateinit var sendButton: ImageButton // Кнопка отправки сообщения
     private lateinit var messageScrollView: ScrollView
+
+    private lateinit var sentMessage: String
+    private var hasError: Boolean = false
 
     private var chatHistory: MutableList<MutableMap<String, String>> = mutableListOf()
 
@@ -136,28 +141,34 @@ class MainActivity : AppCompatActivity() {
 
         // Прослушиваем кнопку "Отправить"
         sendButton.setOnClickListener {
-            val message = messageEditText.text.toString() // Получение текста сообщения из поля ввода
+            sentMessage = messageEditText.text.toString() // Получение текста сообщения из поля ввода
 
-            if (message.isNotBlank()) {
-                displaySentMessage(message) // Отображение отправленного сообщения
-                messageEditText.text.clear() // Очистка поля ввода
+            if (sentMessage.isNotBlank()) {
+                // Проверяем наличие ошибки в предыдущем сообщении собеседника
+                if (!hasError) {
+                    displaySentMessage(sentMessage) // Отображение отправленного сообщения
+                    messageEditText.text.clear() // Очистка поля ввода
 
-                // Формируем подсказку, объединяя предыдущие сообщения и новое сообщение пользователя
-                chatHistory.add(mutableMapOf("role" to "user", "content" to message))
+                    // Формируем подсказку, объединяя предыдущие сообщения и новое сообщение пользователя
+                    chatHistory.add(mutableMapOf("role" to "user", "content" to sentMessage))
 
-                // Вызов функции askGpt из Python с использованием Chaquopy
-                GlobalScope.launch(Dispatchers.IO) {
-                    val responseText = askGpt(message)
-
-                    // Отображение ответа chatGPT
-                    withContext(Dispatchers.Main) {
-                        displayReceivedMessage(responseText)
-                    }
+                    // Вызов функции askGpt из Python с использованием Chaquopy
+                    askGpt(sentMessage)
+                } else {
+                    // Не удалось отправить сообщение. Предыдущее сообщение содержит ошибку
+                    // Скрываем клавиатуру
+                    hideKeyboard()
                 }
             } else {
                 Log.d("TAG", "Отправлено пустое сообщение")
             }
         }
+
+    }
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(messageEditText.windowToken, 0)
     }
 
     companion object {
@@ -183,19 +194,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Функция для вызова функции askGpt из Python с использованием Chaquopy
-    private fun askGpt(content: String): String {
-        val py = Python.getInstance()
-        val module = py.getModule("chat_gpt")
-
+    private fun askGpt(content: String) {
         val sharedPreferences = getSharedPreferences("MyPreferences", MODE_PRIVATE)
         val openAiApiKey = sharedPreferences.getString("OpenAiApiKey", "")
 
-        val response  = module.callAttr("askGPT", getChatHistoryJson(), content, openAiApiKey).toString()
+        // Вызов функции askGpt в фоновом потоке с использованием Coroutine
+        GlobalScope.launch(Dispatchers.IO) {
+            val responseText = withContext(Dispatchers.Default) {
+                val py = Python.getInstance()
+                val module = py.getModule("chat_gpt")
+                module.callAttr("askGPT", getChatHistoryJson(), content, openAiApiKey).toString()
+            }
 
-        chatHistory.add(mutableMapOf("role" to "assistant", "content" to response))
-
-        return response
+            // Обновление интерфейса в главном потоке
+            withContext(Dispatchers.Main) {
+                if (responseText.startsWith("Ошибка:")) {
+                    hasError = true
+                    // Выполняем код, если строка начинается с "Ошибка: "
+                    displayReceivedMessage(responseText)
+                } else {
+                    hasError = false
+                    // Выполняем код, если строка не начинается с "Ошибка: "
+                    chatHistory.add(mutableMapOf("role" to "assistant", "content" to responseText))
+                    displayReceivedMessage(responseText)
+                    Log.d("MY_TAG", responseText)
+                }
+            }
+        }
     }
+
 
     // Функция отображения сообщения отправителя
     private fun displaySentMessage(message: String) {
@@ -212,9 +239,8 @@ class MainActivity : AppCompatActivity() {
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
+        layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT
         layoutParams.gravity = Gravity.END
-        layoutParams.topMargin = 8
-        layoutParams.bottomMargin = 8
 
         messageTextView.layoutParams = layoutParams
 
@@ -230,9 +256,6 @@ class MainActivity : AppCompatActivity() {
 
         // После добавления сообщения прокрутите чат вниз
         scrollToBottom()
-
-        // Добавление разделительной линии после сообщения
-        addDividingLine()
     }
 
     // Функция отображения сообщения chatGPT
@@ -241,8 +264,14 @@ class MainActivity : AppCompatActivity() {
         val messageTextView = TextView(this)
         messageTextView.text = message
         messageTextView.setBackgroundResource(R.drawable.received_message_bg)
-        messageTextView.setTextColor(resources.getColor(R.color.received_message_text_color))
-        messageTextView.setTextAppearance(R.style.ChatMessageTextReceiver) // Стиль текста
+
+        if (hasError) {
+            // Устанавливаем красный цвет текста для сообщений с ошибкой
+            messageTextView.setTextAppearance(R.style.ChatMessageErrorTextReceiver) // Стиль текста
+        } else {
+            messageTextView.setTextAppearance(R.style.ChatMessageTextReceiver) // Стиль текста
+        }
+
         messageTextView.setPadding(16, 8, 16, 8)
 
         // Установка параметров макета для выравнивания сообщения влево
@@ -250,9 +279,8 @@ class MainActivity : AppCompatActivity() {
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
+        layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT
         layoutParams.gravity = Gravity.START
-        layoutParams.topMargin = 8
-        layoutParams.bottomMargin = 8
 
         messageTextView.layoutParams = layoutParams
 
@@ -266,11 +294,57 @@ class MainActivity : AppCompatActivity() {
         messageContainer.addView(messageTextView)
         registerForContextMenu(messageTextView)
 
-        // После добавления сообщения прокрутите чат вниз
-        scrollToBottom()
+        // Если сообщение является ошибкой, добавьте кнопку "Отправить сообщение заново"
+        if (hasError) {
+            val retryButton = Button(this)
+            retryButton.text = "Отправить сообщение заново"
 
-        // Добавление разделительной линии после сообщения
-        addDividingLine()
+            // Настройка фона кнопки
+            retryButton.setBackgroundResource(R.drawable.received_message_bg) // Замените R.drawable.retry_button_bg на ваш фоновый ресурс
+
+            // Настройка цвета текста кнопки
+            retryButton.setTextColor(resources.getColor(R.color.received_message_text_color)) // Замените R.color.retry_button_text_color на ваш цвет текста
+
+            // Настройка оформления кнопки
+            retryButton.setTextAppearance(R.style.ChatMessageTextReceiver) // Замените R.style.RetryButtonTextStyle на ваш стиль текста кнопки
+
+            // Установка размеров кнопки и отступов
+            val layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT // ширина кнопки в ширину экрана
+            layoutParams.gravity = Gravity.CENTER_HORIZONTAL // Размещение по горизонтали посередине
+            layoutParams.topMargin = 8 // Отступ сверху
+            layoutParams.bottomMargin = 8 // Отступ снизу
+            retryButton.layoutParams = layoutParams
+
+            retryButton.setOnClickListener {
+                // При нажатии на кнопку вызовите функцию отправки сообщения заново
+                resendMessage(sentMessage)
+            }
+            messageContainer.addView(retryButton)
+        }else {
+            // После добавления сообщения прокрутите чат вниз
+            scrollToBottom()
+        }
+    }
+
+    // Функция повторной отправки сообщения
+    private fun resendMessage(message: String) {
+        // Вызов функции askGpt из Python с использованием Chaquopy
+        askGpt(message)
+
+        // Удаление сообщения с ошибкой и кнопки "Отправить сообщение заново"
+        val childCount = messageContainer.childCount
+        for (i in childCount - 1 downTo 0) {
+            val childView = messageContainer.getChildAt(i)
+            if (childView is TextView && childView.text.toString().startsWith("Ошибка: ")) {
+                messageContainer.removeView(childView)
+            } else if (childView is Button && childView.text == "Отправить сообщение заново") {
+                messageContainer.removeView(childView)
+            }
+        }
     }
 
     // Функция добавляет разделительную линию после сообщения

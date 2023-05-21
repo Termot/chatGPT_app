@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="sent_message_text_color">#FFFFFF</color>
     <color name="received_message_text_color">#FFFFFF</color>
+    <color name="error_message_text_color">#FF9999</color>
 </resources>

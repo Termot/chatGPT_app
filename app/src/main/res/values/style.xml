@@ -28,7 +28,11 @@
         <item name="android:textColor">#FFFFFF</item> <!-- Цвет текста -->
         <item name="android:padding">12dp</item> <!-- Внутренний отступ текста -->
     </style>
-
+    <style name="ChatMessageErrorTextReceiver">
+        <item name="android:textSize">16sp</item> <!-- Размер текста -->
+        <item name="android:textColor">#FF9999</item> <!-- Цвет текста -->
+        <item name="android:padding">12dp</item> <!-- Внутренний отступ текста -->
+    </style>
     <style name="ChatEditText" parent="Widget.AppCompat.EditText">
         <item name="android:background">@null</item> <!-- Удалить фон -->
         <item name="android:paddingStart">16dp</item> <!-- Отступ слева -->
