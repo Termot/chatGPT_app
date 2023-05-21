@@ -23,8 +23,7 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.ScrollView
 import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
-import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.GravityCompat
@@ -45,8 +44,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var messageEditText: EditText // Поле ввода сообщения
     private lateinit var sendButton: ImageButton // Кнопка отправки сообщения
     private lateinit var messageScrollView: ScrollView
-
     private lateinit var sentMessage: String
+
     private var hasError: Boolean = false
 
     private var chatHistory: MutableList<MutableMap<String, String>> = mutableListOf()
@@ -85,22 +84,6 @@ class MainActivity : AppCompatActivity() {
             drawerLayout.closeDrawer(GravityCompat.START)
         }
 
-        // Toolbar, а иначе верхний элемент окна с кнопками активности, например, кнопки вызова меню
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-
-        val toggle = ActionBarDrawerToggle(
-            this,
-            drawerLayout,
-            toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        )
-
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
-
         // Настройки свайпа бокового окна
         val gestureDetector = GestureDetectorCompat(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onFling(
@@ -125,6 +108,18 @@ class MainActivity : AppCompatActivity() {
         rootView.setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
             false
+        }
+
+        // При нажатии на кнопку меню открывается меню
+        val openMenuButton: ImageButton = findViewById(R.id.openMenuButton)
+        openMenuButton.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
+
+        // Отображение диалогового окна при нажатии на кнопку "Выбрать чат"
+        val selectChatButton: ImageButton = findViewById(R.id.selectChatButton)
+        selectChatButton.setOnClickListener {
+            showChatSelectionDialog()
         }
 
 //        // Делаем чат интеллигентным помощником
@@ -165,6 +160,22 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
+    private fun showChatSelectionDialog() {
+        val builder = AlertDialog.Builder(this)
+        val inflater = layoutInflater
+        val dialogView = inflater.inflate(R.layout.dialog_select_chat, null)
+
+        builder.setView(dialogView)
+
+        val dialog = builder.create()
+        val cancelButton: Button = dialogView.findViewById(R.id.cancelButton)
+        cancelButton.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
 
     private fun hideKeyboard() {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

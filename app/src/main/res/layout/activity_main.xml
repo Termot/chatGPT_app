@@ -15,15 +15,33 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Добавляем Toolbar -->
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="#343541"
-            android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-            app:title="ChatGPT" />
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/openMenuButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/selector_button"
+                android:contentDescription="Открыть меню"
+                android:src="@drawable/ic_menu_button" />
+
+            <ImageButton
+                android:id="@+id/selectChatButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="8dp"
+                android:background="@drawable/selector_button"
+                android:src="@drawable/ic_select_chat_button"
+                android:contentDescription="Выбрать чат" />
+        </RelativeLayout>
 
         <ScrollView
             android:id="@+id/messageScrollView"
